@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Pedido SDM</title>
+
+<style>
+
+body{
+font-family: Arial;
+background:#f2f2f2;
+display:flex;
+justify-content:center;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+width:350px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h2{
+text-align:center;
+}
+
+label{
+font-weight:bold;
+}
+
+.required{
+color:red;
+}
+
+input, select{
+width:100%;
+padding:8px;
+margin-top:5px;
+margin-bottom:15px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+.tamanhos{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:15px;
+}
+
+.size{
+padding:8px 12px;
+border:1px solid #ccc;
+border-radius:5px;
+cursor:pointer;
+}
+
+.size input{
+display:none;
+}
+
+.size.selected{
+background:black;
+color:white;
+border-color:black;
+}
+
+.cores{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.cor{
+width:30px;
+height:30px;
+border-radius:50%;
+cursor:pointer;
+border:2px solid transparent;
+}
+
+.cor.selected{
+border:2px solid black;
+}
+
+.total{
+font-weight:bold;
+margin-bottom:15px;
+}
+
+.whatsapp{
+width:100%;
+padding:10px;
+background:#25D366;
+color:white;
+border:none;
+border-radius:5px;
+font-size:16px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Pedido SDM</h2>
+
+<form id="pedidoForm">
+
+<label>Nome</label>
+<input type="text" id="nome">
+
+<label>Localização <span class="required">*</span></label>
+<input type="text" id="local" required>
+
+<label>Telefone <span class="required">*</span></label>
+<input type="tel" id="telefone" pattern="[0-9]{9}" required placeholder="Ex: 841234567">
+
+<label>Produto <span class="required">*</span></label>
+<select id="produto" onchange="calcular()" required>
+<option value="">Escolher</option>
+<option value="750">Camiseta Normal - 750MT</option>
+<option value="1200">Camiseta Oversized - 1200MT</option>
+</select>
+
+<label>Cor <span class="required">*</span></label>
+
+<div class="cores">
+
+<div class="cor" style="background:black" onclick="selecionarCor(this,'Preto')"></div>
+
+<div class="cor" style="background:white;border:1px solid #ccc" onclick="selecionarCor(this,'Branco')"></div>
+
+<div class="cor" style="background:rgb(26, 2, 245)" onclick="selecionarCor(this,'Cinza')"></div>
+
+<div class="cor" style="background:rgb(245, 2, 2)" onclick="selecionarCor(this,'Cinza')"></div>
+
+</div>
+
+<label>Tamanhos <span class="required">*</span></label>
+
+<div class="tamanhos">
+
+<label class="size">
+<input type="checkbox" value="S">
+S
+</label>
+
+<label class="size">
+<input type="checkbox" value="M">
+M
+</label>
+
+<label class="size">
+<input type="checkbox" value="L">
+L
+</label>
+
+<label class="size">
+<input type="checkbox" value="XL">
+XL
+</label>
+
+</div>
+
+<label>Quantidade</label>
+<input type="number" id="quantidade" value="1" min="1" onchange="calcular()">
+
+<div id="total" class="total">
+Total: 0 MT
+</div>
+
+<button type="submit" class="whatsapp">
+Enviar Pedido para WhatsApp
+</button>
+
+</form>
+
+</div>
+
+<script>
+
+let corSelecionada=""
+
+function selecionarCor(el,cor){
+
+document.querySelectorAll(".cor").forEach(c=>{
+c.classList.remove("selected")
+})
+
+el.classList.add("selected")
+corSelecionada=cor
+
+}
+
+document.querySelectorAll(".size").forEach(size=>{
+
+size.addEventListener("click",function(){
+
+let checkbox=this.querySelector("input")
+
+let quantidade=parseInt(document.getElementById("quantidade").value)
+
+let selecionados=document.querySelectorAll(".size input:checked").length
+
+if(!checkbox.checked && selecionados >= quantidade){
+
+alert("Só pode selecionar "+quantidade+" tamanho(s)")
+
+return
+
+}
+
+checkbox.checked=!checkbox.checked
+
+this.classList.toggle("selected",checkbox.checked)
+
+})
+
+})
+function calcular(){
+
+let produto=document.getElementById("produto").value
+let quantidade=document.getElementById("quantidade").value
+
+let total=produto*quantidade
+
+document.getElementById("total").innerText="Total: "+total+" MT"
+
+let selecionados=document.querySelectorAll(".size input:checked")
+
+if(selecionados.length > quantidade){
+
+selecionados.forEach(el=>{
+el.checked=false
+el.parentElement.classList.remove("selected")
+})
+
+}
+
+}
+
+const form=document.getElementById("pedidoForm")
+
+form.addEventListener("submit",function(e){
+
+e.preventDefault()
+
+if(!form.checkValidity()){
+form.reportValidity()
+return
+}
+
+let nome=document.getElementById("nome").value
+let local=document.getElementById("local").value
+let telefone=document.getElementById("telefone").value
+let produto=document.getElementById("produto").options[document.getElementById("produto").selectedIndex].text
+let quantidade=document.getElementById("quantidade").value
+let total=document.getElementById("total").innerText
+
+let tamanhos=[]
+
+document.querySelectorAll('.size input:checked').forEach(el=>{
+tamanhos.push(el.value)
+})
+
+if(tamanhos.length==0){
+alert("Selecione pelo menos um tamanho.")
+return
+}
+
+if(corSelecionada==""){
+alert("Selecione uma cor.")
+return
+}
+
+let mensagem=`*NOVO PEDIDO SDM*%0A
+Nome: ${nome}%0A
+Localização: ${local}%0A
+Telefone: ${telefone}%0A
+Produto: ${produto}%0A
+Cor: ${corSelecionada}%0A
+Tamanhos: ${tamanhos.join(", ")}%0A
+Quantidade: ${quantidade}%0A
+${total}`
+
+let numero="258852370692"
+
+let url=`https://wa.me/${numero}?text=${mensagem}`
+
+window.open(url)
+
+})
+
+</script>
+
+</body>
+</html>
